@@ -157,3 +157,89 @@ class Spect_CNN(nn.Module):
         scores=torch.sigmoid(scores)
         return scores # output is N x output_shape
 
+
+
+class ResNet1d(nn.Module):
+    """Residual network for unidimensional signals.
+    Parameters
+    ----------
+    input_dim : tuple
+        Input dimensions. Tuple containing dimensions for the neural network
+        input tensor. Should be like: ``(n_filters, n_samples)``.
+    blocks_dim : list of tuples
+        Dimensions of residual blocks.  The i-th tuple should contain the dimensions
+        of the output (i-1)-th residual block and the input to the i-th residual
+        block. Each tuple shoud be like: ``(n_filters, n_samples)``. `n_samples`
+        for two consecutive samples should always decrease by an integer factor.
+    dropout_rate: float [0, 1), optional
+        Dropout rate used in all Dropout layers. Default is 0.8
+    kernel_size: int, optional
+        Kernel size for convolutional layers. The current implementation
+        only supports odd kernel sizes. Default is 17.
+    References
+    ----------
+    .. [1] K. He, X. Zhang, S. Ren, and J. Sun, "Identity Mappings in Deep Residual Networks,"
+           arXiv:1603.05027, Mar. 2016. https://arxiv.org/pdf/1603.05027.pdf.
+    .. [2] K. He, X. Zhang, S. Ren, and J. Sun, "Deep Residual Learning for Image Recognition," in 2016 IEEE Conference
+           on Computer Vision and Pattern Recognition (CVPR), 2016, pp. 770-778. https://arxiv.org/pdf/1512.03385.pdf
+    """
+
+    def __init__(self,  n_classes=7, kernel_size=17, dropout_rate=0.8):
+        super(ResNet1d, self).__init__()
+        # First layers
+        self.blocks_dim=list(zip(args.net_filter_size, args.net_seq_lengh))
+
+        n_filters_in, n_filters_out = 12, self.blocks_dim[0][0]
+        n_samples_in, n_samples_out = 4096, self.blocks_dim[0][1]
+        downsample = _downsample(n_samples_in, n_samples_out)
+        
+        padding = _padding(downsample, kernel_size)
+        self.conv1 = nn.Conv1d(n_filters_in, n_filters_out, kernel_size, bias=False,
+                               stride=downsample, padding=padding)
+        self.bn1 = nn.BatchNorm1d(n_filters_out)
+        # self.blocks_dim=list(zip(args.net_filter_size, args.net_seq_lengh))
+
+        # Residual block layers
+        self.res_blocks = []
+        for i, (n_filters, n_samples) in enumerate(self.blocks_dim):
+            n_filters_in, n_filters_out = n_filters_out, n_filters
+            n_samples_in, n_samples_out = n_samples_out, n_samples
+            downsample = _downsample(n_samples_in, n_samples_out)
+            
+            # print(f'{i} th downsample {downsample}' )
+            # print(f'i th n_filters_out {n_filters_out}')
+            resblk1d = ResBlock1d( n_filters_in,n_filters_out, downsample, kernel_size, dropout_rate)
+            self.add_module('resblock1d_{0}'.format(i), resblk1d)
+            self.res_blocks += [resblk1d]
+
+        # Linear layer
+        n_filters_last, n_samples_last = self.blocks_dim[-1]
+        last_layer_dim = n_filters_last * n_samples_last
+        self.lin = nn.Linear(last_layer_dim, n_classes)
+        self.n_blk = len(self.blocks_dim)
+
+    def forward(self, x):
+        """Implement ResNet1d forward propagation"""
+        # First layers
+        # print(f' 1 input size {x.shape}')
+        x = self.conv1(x)
+        # print(f' 2 input size {x.shape}')
+        x = self.bn1(x)
+        # print(f' 3 input size {x.shape}')
+
+        # Residual blocks
+        y = x
+        for i,blk in enumerate(self.res_blocks):
+            # print(f' {i}th input shape {x.shape}')
+            x, y = blk(x, y)
+            # print(f' {i}th output x shape {x.shape}')
+            # print(f' {i}th output y shape {y.shape}')
+
+        # Flatten array
+        x = x.view(x.size(0), -1)
+
+        # Fully conected layer
+        x = self.lin(x)
+        return x
+
+
