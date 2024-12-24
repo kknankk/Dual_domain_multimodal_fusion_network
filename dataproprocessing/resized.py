@@ -17,7 +17,7 @@ paths_done = glob.glob(f'/home/mimic/MIMIC_subset/MIMIC_subset/resized/*.jpg', r
 print('done', len(paths_done))
 
 # paths_all = glob.glob(f'{data_dir}/*.jpg', recursive = True)
-# # print(paths_all)#精确到jpg路径
+# # print(paths_all)
 # print('all', len(paths_all))
 
 
