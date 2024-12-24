@@ -13,7 +13,6 @@ from model.ViT_b16 import VisionTransformer as vit
 from model.ViT_b16 import CONFIGS
 from model.share_spec import IMFM,DiffLoss, MSE, SIMSE, CMD,ImagePatchEmbed,FeedForward,AddNorm
 import model.configs as configs
-from model.utils import func_attention,Router,Refinement
 from model.xlstm_used import xLSTM
 import torch.nn as nn
 import torchvision
