@@ -12,6 +12,12 @@ def args_parser():
                         help='filter size in resnet layers (default: [64, 128, 196, 256, 320]).')
     parser.add_argument('--net_seq_lengh', type=int, nargs='+', default=[4096, 1024, 256, 64, 16],
                         help='number of samples per resnet layer (default: [4096, 1024, 256, 64, 16]).')
+    
+    parser.add_argument('--mod_net_filter_size', type=int, nargs='+', default=[64, 128, 196, 256, 320],
+                        help='filter size in resnet layers .')
+    parser.add_argument('--mod_net_seq_lengh', type=int, nargs='+', default=[4096, 2048, 1024, 512, 256],
+                        help='number of samples per resnet layer .')
+
     # parser.add_argument('--model', type=str,default='wavevit_s', required=False, choices=['ResNet1d', 'spectrogram', 'ECGModel', 'wavevit_s', 'CXRModels'], help='Specify the model to train')
     parser.add_argument('--ecg_model', type=str, default='none', help='ECG model name')
     parser.add_argument('--cxr_model', type=str, default='none', help='CXR model name')
