@@ -1,5 +1,5 @@
 # #!/usr/bin/python
-
+#adjusted from 'https://github.com/nyuad-cai/MedFuse/blob/main/resize.py'
 # import thread
 import time
 from PIL import Image
@@ -8,21 +8,21 @@ from tqdm import tqdm
 import os
 
 print('starting')
-# data_dir = '/data/ke/data/MIMIC/physionet.org/files/mimic-cxr-jpg'
-# version = '2.0.0'
-data_dir = '/home/mimic/MIMIC_subset/MIMIC_subset/download_xcr'
-# version = '2.0.0'
+
+data_dir ='/home/mimic/MIMIC_subset/MIMIC_subset/raw_database/physionet.org/files/mimic-cxr-jpg/2.0.0/files'
 
 # paths_done = glob.glob(f'{data_dir}/{version}/resized/**/*.jpg', recursive = True)
 # print('done', len(paths_done))
 paths_done = glob.glob(f'/home/mimic/MIMIC_subset/MIMIC_subset/resized/*.jpg', recursive = True)
 print('done', len(paths_done))
 
-paths_all = glob.glob(f'{data_dir}/*.jpg', recursive = True)
-# print(paths_all)#精确到jpg路径
+# paths_all = glob.glob(f'{data_dir}/*.jpg', recursive = True)
+# # print(paths_all)#精确到jpg路径
+# print('all', len(paths_all))
+
+
+paths_all = glob.glob(f'{data_dir}/**/*.jpg', recursive = True)
 print('all', len(paths_all))
-
-
 
 done_files = [os.path.basename(path) for path in paths_done]
 # print(done_files)
