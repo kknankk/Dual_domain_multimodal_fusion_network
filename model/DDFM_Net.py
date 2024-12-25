@@ -8,7 +8,7 @@ import torchaudio
 import sys
 import os
 sys.path.append(os.path.abspath('/home/ke/MIMIC_subset/MIMIC_subset'))
-from model.fusion_model import FtBlock
+from model.fusion_model import FFMBlock
 from model.ViT_b16 import VisionTransformer as vit
 from model.ViT_b16 import CONFIGS
 from model.share_spec import IMFM,DiffLoss, MSE, SIMSE, CMD,ImagePatchEmbed,FeedForward,AddNorm
@@ -784,7 +784,7 @@ class DDMF_Net(nn.Module):
         img_len = (img_size // patch_size) * (img_size // patch_size)
         n = img_len // 2 + 1
 
-        self.FourierTransormer = FtBlock(d_model, s, n, num_layer, num_filter, dropout)
+        self.FFM = FFMBlock(d_model, s, n, num_layer, num_filter, dropout)
 
         self.fusion = Fusion(d_model)
 
@@ -883,7 +883,7 @@ class DDMF_Net(nn.Module):
         image = image + self.img_pos_embed
         image = self.img_pos_drop(image)
 
-        text, image = self.FourierTransormer(text, image)
+        text, image = self.FFM(text, image)
         image=image.permute(0,2,1)
         image=self.blk_fre_cxr(image)
 
