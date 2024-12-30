@@ -6,6 +6,6 @@ Dural-Domain Multimodal Fuion Network(DDMF-Net)
 
 **Dataset-preprocessing**: run train_test_split.py----> run resize.py
 
-**Train**: terminal: python main.py --fusion_model DDMF_Net --fusion_type deeper_frequency_fusion_mod --lr 0.0001 --name ccloss_jsdweight --batch_size 128
+**Train**: terminal: python main.py --fusion_model DDMF_Net --fusion_type deeper_frequency_fusion_mod --lr 0.0001 --name DDMFNet_cli --batch_size 128
 
-**Test**: terminal: python main.py --fusion_model DDMF_Net --fusion_type deeper_frequency_fusion_mod_test --lr 0.0001 --name ccloss_jsdweight --batch_size 128
+**Test**: terminal: python main.py --fusion_model DDMF_Net --fusion_type deeper_frequency_fusion_mod_test --lr 0.0001 --name DDMFNet_cli --batch_size 128
