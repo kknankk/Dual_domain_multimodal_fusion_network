@@ -5,7 +5,7 @@ import json
 sys.path.append(os.path.abspath('/data/mimic/MIMIC_subset/MIMIC_subset'))
 import torch
 from train.trainer_utils import Trainer
-from dataset.update_ECGdataset import get_ECG_datasets,get_data_loader
+
 import numpy as np
 # from model.ECG_model import LSTM,Spect_CNN,ECGModel
 # from model.fusion_model import FSRU
@@ -37,7 +37,7 @@ class deeper_fusion_trainer_mod(Trainer):
         model,
         test_dl=None):
       
-        # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1" #use first four GPU
+        # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1" #use all avaliable GPU
 
         super(deeper_fusion_trainer_mod,self).__init__(args)
 
