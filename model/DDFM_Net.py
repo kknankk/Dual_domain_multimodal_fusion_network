@@ -221,7 +221,7 @@ class ResNet1d(nn.Module):
         x=x.permute(0,2,1)
         x=self.lin128(x)
         # print(f'x {x.shape}')#[bs,16,128]
-        # x = x.view(-1, 128, 16)  # 将输出调整回 [bs, 128, 16]
+        # x = x.view(-1, 128, 16)  
         # print(f'after view x {x.shape}')
         # x1 = x.view(x.size(0), -1)
 
@@ -337,7 +337,7 @@ class CXRModels(nn.Module):
         self.feats_dim = d_visual
 
     def forward(self, x):
-        # 获取 backbone 的输出
+       
         visual_feats = self.vision_backbone.conv1(x)
         visual_feats = self.vision_backbone.bn1(visual_feats)
         visual_feats = self.vision_backbone.relu(visual_feats)
@@ -349,7 +349,7 @@ class CXRModels(nn.Module):
         visual_feats = self.vision_backbone.layer4(visual_feats)
 
 
-        # preds = self.classifier(visual_feats.view(visual_feats.size(0), -1))  # 展平
+        # preds = self.classifier(visual_feats.view(visual_feats.size(0), -1)) 
         return visual_feats
 
 
@@ -450,9 +450,9 @@ class final_extract(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv1d(64, 64, kernel_size=5, stride=2, padding=2)
-        #换为kernel_size=1
+        
         # self.conv1 = nn.Conv1d(128, 64, kernel_size=1, stride=1, padding=0)
-        #换为kernel_size=1
+      
         self.pool = nn.AdaptiveAvgPool1d(1)
         # self.layernorm=nn.LayerNorm(d_model)
 
