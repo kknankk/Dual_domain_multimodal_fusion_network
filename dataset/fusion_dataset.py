@@ -1,176 +1,7 @@
 
-# import sys
-# import os
-# sys.path.append(os.path.abspath('/home/mimic/MIMIC_subset/MIMIC_subset'))
-# from torch.utils.data import Dataset
-# from dataset.ECG_dataset import get_ECG_datasets
-# from dataset.cxr_dataset import get_cxr_datasets
-# from torch.utils.data import DataLoader
-# import numpy as np
-# from torch.utils.data import Dataset
-# import torch
-
-# def generate_file_path(base_path, split):
-#     # 使用 f-string 生成路径
-#     return f"{base_path}{split}.csv"
-
-# class MIMIC_CXR_EHR(Dataset):
-#     def __init__(self,ehr_ds,cxr_ds,split='train'):
-#         fullinfo_file='/home/mimic/MIMIC_subset/MIMIC_subset/PA_subset/with_nonan_label_PA_'
-#         file_path = generate_file_path(fullinfo_file, split)
-#         self.ecg_dir='/home/mimic/MIMIC_subset/MIMIC_subset/ECG_data'
-
-#         with open(file_path, "r")as lfile:
-#             self._data = lfile.readlines()
-#         self._listfile_header = self._data[0]
-#         self._data = self._data[1:]
-#         self.CLASSES=self._listfile_header.strip().split(',')[6:13]
-#         self._data = [line.split(',') for line in self._data]
-
-#         # label_indices = {label: idx + 6 for idx, label in enumerate(self.CLASSES)}
-
-#         self.data_map = {}
-
-#         self.data_map = {
-#             mas[1]: {
-#                 'labels': [1 if label == '1.0' else 0 for label in mas[6:13]],
-#                 'hadm_id': float(mas[1]),
-#                 'first_ecg_path': mas[4],
-#                 # 'dicom_id': float(mas[14]),
-#                 }
-#                 for mas in self._data
-#         }
-#         # print(self.data_map)
-#         # print(len(self.data_map))#train 10632;test/val:1653
-#         self.names = list(self.data_map.keys())
-#         # print(self.names[2])#21566603
-#         # print(self.data_map)# right
-#         # self.transform = transform
-#         # self.ecg_dir='/data/ke/data/physionet.org/files/mimic-iv-ecg/1.0'
-#         self.ehr_ds=ehr_ds
-#         # print(f'self.ehr_ds[5]: {self.ehr_ds[5]}') #index is natural number rather than hadm_id
-#         # data=
-#         # for signal,y in ehr_ds:
-#         #     print(signal,y)#正常的
-#         self.cxr_ds=cxr_ds
-#         self.split=split
-
-#     def __getitem__(self, index):
-#         # y = self.data_map[index]['labels']
-#         individual_hadm_id = self.names[index]
-#         # prin(f'index: {index}')
-#         # breakpoint()
-#         # print(f'self.ehr_ds{index}: {self.ehr_ds[index]}')#index is natural number rather than hadm_id
-#         # ehr_data,y=self.ehr_ds[self.data_map[index]]
-#         ehr_data,y=self.ehr_ds[index].get(individual_hadm_id)
-
-#         # cxr_data=self.cxr_ds[self.data_map[index]]
-#         cxr_data=self.cxr_ds[index][individual_hadm_id]
-#         return ehr_data,cxr_data,y
-
-#     def __len__(self):
-#         return len(self.data_map)
 
 
 
-
-# def load_cxr_ecg(ecg_train_ds, ecg_val_ds, cxr_train_ds, cxr_val_ds, ecg_test_ds, cxr_test_ds):
-
-#     ecg_train_ds, ecg_val_ds, ecg_test_ds = get_ECG_datasets(module='fusion')
-
-#     cxr_train_ds, cxr_val_ds, cxr_test_ds = get_cxr_datasets(module='fusion')
-
-#     train_ds = MIMIC_CXR_EHR(ecg_train_ds,cxr_train_ds,split='train')
-#     val_ds = MIMIC_CXR_EHR(ecg_val_ds,cxr_val_ds,split='val')
-#     test_ds = MIMIC_CXR_EHR(ecg_test_ds,cxr_test_ds,split='test')
-
-#     train_dl = DataLoader(train_ds, batch_size=16, shuffle=True, collate_fn=my_collate, pin_memory=True, num_workers=16, drop_last=True)
-#     val_dl = DataLoader(val_ds, batch_size=16, shuffle=False, collate_fn=my_collate, pin_memory=True, num_workers=16, drop_last=False)
-#     test_dl = DataLoader(test_ds, batch_size=16, shuffle=False, collate_fn=my_collate, pin_memory=True, num_workers=16, drop_last=False)
-
-#     return train_dl, val_dl, test_dl
-
-# # def my_collate(batch):
-# #     # 将样本的输入数据（x）堆叠成一个批次
-# #     ehr_data = np.stack([item[0] for item in batch])
-    
-# #     # 将目标标签（y）转换为NumPy数组
-# #     cxr_data = np.array([item[1] for item in batch])
-# #     target=
-# #     # 返回输入数据和对应的目标标签
-# #     return [ehr_data,cxr_data,targets]
-
-# def my_collate(batch):
-#     ecg_data = [item[0] for item in batch]
-#     # pairs = [False if item[1] is None else True for item in batch]
-#     img = torch.stack([item[1] for item in batch])
-#     # x, seq_length = pad_zeros(x)
-#     targets = np.array([item[2] for item in batch])
-#     # targets_cxr = torch.stack([torch.zeros(14) if item[3] is None else item[3] for item in batch])
-#     return [ecg_data,img,targets]
-
-
-# #-----访问fusion_dataloader测试
-# ehr_train,ehr_test,ehr_val=get_ECG_datasets(module='fusion')
-# cxr_train,cxr_test,cxr_val=get_cxr_datasets(module='fusion')
-
-# train_dl, val_dl,test_dl = load_cxr_ecg(ehr_train,ehr_val,cxr_train,cxr_val,ehr_test,cxr_test)
-
-# # 访问train_dl中的数据
-# for batch_idx, batch in enumerate(train_dl):
-#     # batch 是从 collate_fn 处理后的结果
-#     signal,cxr_data, label = batch  # 这里假设 my_collate 函数返回(signal, label)
-    
-#     print(f"Batch {batch_idx}:")
-#     print(f"Signal shape: {len(signal)}")  # 打印信号的形状
-#     print(f'cxr shape: {cxr_data.shape}')
-#     print(f"Labels: {label}")  # 打印标签
-    
-    # 你可以在这里对数据进行进一步处理或训练模型
-    # break  # 如果你只想查看第一个 batch 的数据，可以使用 break
-
-
-
-
-#-----------------test part
-# import logging
-
-# # 设置logger
-# logger = logging.getLogger('MIMIC_logger')
-# logger.setLevel(logging.INFO)
-
-# # 创建文件处理器来保存日志
-# file_handler = logging.FileHandler('MIMIC_output.log')
-# file_handler.setLevel(logging.INFO)
-
-
-# ehr_train,ehr_test,ehr_val=get_ECG_datasets(module='fusion')
-# for a,b in ehr_train:
-#     print(a,b)
-# for index,(signal,y) in enumerate(ehr_train):
-    # print(signal,y)
-# print(ehr_train)
-# cxr_train,cxr_test,cxr_val=get_cxr_datasets(module='fusion')
-# train_dl, val_dl, test_dl = load_cxr_ehr(ecg_train_ds, ecg_val_ds, cxr_train_ds, cxr_val_ds, ecg_test_ds, cxr_test_ds)
-# train_ds = MIMIC_CXR_EHR(ehr_train,cxr_train,split='train')
-# for i,(ehr_data,cxr_data, y) in enumerate(train_ds):
-#     print(f'ehr_data: {ehr_data}')
-#     print(f'cxr_data: {cxr_data}')
-#     print(f'y: {y}')
-#----------above all right
-# ehr_data,cxr_data, y=train_ds.__getitem__(index=3)
-# print(f'ehr_data: {ehr_data}')
-# print(f'cxr_data: {cxr_data}')
-# print(f'y: {y}')
-# print(f'ech_data {ehr_data}')
-# print(f'cxr_data {cxr_data}')
-# print(f'y {y}')
-# logger.info(f'EHR Data: {ehr_data}')
-# logger.info(f'CXR Data: {cxr_data}')
-# logger.info(f'Label (y): {y}')
-# train_ds=MIMIC_CSR_EHR(ehr_ds,cxr_ds,split='train')
-
-#------------------------------------------------------------
 import os
 import numpy as np
 from PIL import Image
@@ -199,7 +30,7 @@ import wfdb # wfdb?
 from scipy.signal import stft
 import os
 import sys
-# 将项目根目录添加到 Python 路径
+
 sys.path.append(os.path.abspath('/home/mimic/MIMIC_subset/MIMIC_subset'))
 # from dataset.ECG_dataset import get_ECG_datasets,get_data_loader
 
@@ -226,15 +57,15 @@ def adjust_sig(signal):
     return new_sig
     
 def generate_file_path(base_path, split):
-    # 使用 f-string 生成路径
+   
     return f"{base_path}{split}.csv"
 
 def generate_file_path(base_path, split):
-    # 使用 f-string 生成路径
+
     return f"{base_path}{split}.csv"
 
 def get_image_path(cxr_rootpath, dicom_id):
-    # 构造完整的图像路径
+
     image_filename = f"{dicom_id}.jpg"
     image_path = os.path.join(cxr_rootpath, image_filename)
     return image_path
@@ -323,7 +154,7 @@ class MIMIC_ECG_CXR(Dataset):
 
 
             if np.isnan(signal).any():
-                return None  # 返回 None 或者其他标记值，表示该实例无效
+                return None  
 
             signal=adjust_sig(signal)#4096,12
             for i in range(signal.shape[1]):
@@ -332,7 +163,7 @@ class MIMIC_ECG_CXR(Dataset):
             
             if np.isnan(signal).any():
                 print("Data contains NaN values. Dropping the entire data.")
-                # 清空数据（或其他处理逻辑）
+               
                 signal = None  
 
             if signal is not None:
@@ -401,7 +232,7 @@ class MIMIC_ECG_CXR(Dataset):
 
                     # mean=torch.tensor([0.022676835, 0.013688515, -0.007821267, -0.017821848, 0.0023585667, 0.014657727, -0.018340515, -0.0038577598, -0.00035443218, 0.014264569, 0.020447042, 0.019408429])
                     # std=torch.tensor([0.15746197, 0.15279943, 0.16141628, 0.13161984, 0.1358389, 0.1403546, 0.19144094, 0.2620128, 0.27269644, 0.24160655, 0.21423854, 0.18789752])
-                    #===先去掉下面的norm
+                    
                     # mean = torch.tensor([0.020118936896324158, 0.010715494863688946, -0.008904249407351017, -0.01507102232426405, 0.0005865496350452304, 0.014280002564191818, -0.020457008853554726, -0.014558318071067333, -0.010938421823084354, 0.005140588618814945, 0.015684371814131737, 0.01892842911183834])
                     # std = torch.tensor( [0.14524735510349274, 0.14451056718826294, 0.16435310244560242, 0.11869681626558304, 0.13675516843795776, 0.1381322145462036, 0.19892378151416779, 0.2894032895565033, 0.2974630296230316, 0.24795465171337128, 0.2104521095752716, 0.1804078221321106])
 
@@ -419,13 +250,13 @@ class MIMIC_ECG_CXR(Dataset):
                 if self.split=='val' and self.args.domain=='deeper_frequency_fusion':
 
                     # signal = torch.tensor(signal)
-                    #====先去掉norm
+                   
                     # signal = signal.clone().detach()
                     # mean = torch.tensor([0.020131081342697144, 0.011969772167503834, -0.007804600056260824, -0.015651753172278404, 0.0017433963948860765, 0.013781293295323849, -0.020989634096622467, -0.01432200986891985, -0.011121232062578201, 0.005424626171588898, 0.0167344119399786, 0.019787846133112907])
                     # std = torch.tensor([0.1451718956232071, 0.13993124663829803, 0.16126003861427307, 0.1166679635643959, 0.1325085312128067, 0.13701407611370087, 0.20065732300281525, 0.2904973328113556, 0.30150458216667175, 0.24946753680706024, 0.2085689753293991, 0.18243145942687988])
                     # # signal=(signal-mean.view(-1,1)) / std.view(-1,1)
                     # signal=(signal-mean) / std
-                    #====先去掉norm
+                 
                     # signal = signal.permute(2, 0, 1)
                     signal=signal
                     if self.args.fusion_type=='deeper_frequency_fusion':
@@ -462,8 +293,8 @@ class MIMIC_ECG_CXR(Dataset):
             # img_path= get_image_path(self.cxr_rootpath, dicom_id)
 
             if not os.path.exists(img_path):
-                # print(f'缺失文件 ID: {index1}, 路径: {img_path}')  # 打印缺失文件的 ID 和路径
-                return None  # 可以返回 None 或者其他默认值
+               
+                return None  
 
 
             img = Image.open(img_path).convert('RGB')
@@ -540,7 +371,7 @@ def get_ecgcxr_data_loader(batch_size):
     return train_dl, val_dl
 
 # def my_collate(batch):
-#     # 将样本的输入数据（x）堆叠成一个批次
+  
 #     #TODO: initial:
 #     batch = [item for item in batch if item is not None]
 
@@ -554,10 +385,10 @@ def get_ecgcxr_data_loader(batch_size):
 
 # # 
     
-#     # 将目标标签（y）转换为NumPy数组
+
 #     targets = np.array([item[2] for item in batch])
     
-#     # 返回输入数据和对应的目标标签
+
 #     return [signal,img,targets]
 
 
@@ -575,15 +406,6 @@ def get_ecgcxr_data_loader(batch_size):
 
     # return train_dl, val_dl, test_dl
 
-# def my_collate(batch):
-#     # 将样本的输入数据（x）堆叠成一个批次
-#     ehr_data = np.stack([item[0] for item in batch])
-    
-#     # 将目标标签（y）转换为NumPy数组
-#     cxr_data = np.array([item[1] for item in batch])
-#     target=
-#     # 返回输入数据和对应的目标标签
-#     return [ehr_data,cxr_data,targets]
 
 def my_collate(batch):
     batch = [item for item in batch if item is not None]
@@ -620,20 +442,6 @@ def my_collate(batch):
 # for i ,data in enumerate(train_dl):
 #     print(i,data)
 
-# 访问train_dl中的数据
-# for batch_idx, batch in enumerate(train_dl):
-#     # batch 是从 collate_fn 处理后的结果
-#     signal,cxr_data, label = batch  # 这里假设 my_collate 函数返回(signal, label)
-    
-#     print(f"Batch {batch_idx}:")
-#     print(f"Signal shape: {len(signal)}")  # 打印信号的形状
-#     print(f'signal {type(signal)}')
-    
-#     tensor_signal = torch.tensor(signal)
-#     print(f"tensor Signal shape: {tensor_signal.shape}")
-
-#     print(f'cxr shape: {cxr_data.shape}')
-#     print(f"Labels: {label.shape}")  # 打印标签
 
 
 
