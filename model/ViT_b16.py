@@ -282,7 +282,7 @@ class VisionTransformer(nn.Module):
 
     def load_from(self, weights):
         with torch.no_grad():
-#删除了本来的if else，直接用0权重给head层，因为类别从2w+变为128
+
             # if self.zero_head:
             #     nn.init.zeros_(self.head.weight)
             #     nn.init.zeros_(self.head.bias)
@@ -349,7 +349,4 @@ CONFIGS = {
     'testing': configs.get_testing(),
 }
 
-#访问vit-B16时：
-# config = CONFIGS['ViT-B_16']
-# model = VisionTransformer(config, args.img_size, zero_head=True, num_classes=num_classes)
-# model.load_from(np.load(args.pretrained_dir))
+
