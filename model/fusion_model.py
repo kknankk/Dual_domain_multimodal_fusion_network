@@ -223,7 +223,7 @@ class FFMLayer(nn.Module):
         assert S  == self.s
 
         _ecg = torch.tensor(_ecg, dtype=torch.complex64)
-        ecg_device = ecg.device  # 获取 ecg 的设备
+        ecg_device = ecg.device 
         _ecg = _ecg.to(ecg_device)
 
         _image = torch.fft.rfft(image, dim=1, norm='ortho') #complex
@@ -248,7 +248,7 @@ class FFMLayer(nn.Module):
         # print(f'after reshape stft ecg {ecg.shape}')
         _,ecg = istft(ecg,fs=400, window='hann',nperseg=512,noverlap=256) #signal=[channel,dim]
         ecg = torch.tensor(ecg)
-        ecg_device = initial_ecg.device  # 获取 ecg 的设备
+        ecg_device = initial_ecg.device  
         ecg = ecg.to(ecg_device)
 
         ecg=ecg.permute(0,2,1)
