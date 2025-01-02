@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
+#adatptive from 'https://github.com/nyuad-cai/MedFuse'
 class Attention(nn.Module):
     def __init__(self, dim=64, num_heads=8, bias=False):
         super(Attention, self).__init__()
