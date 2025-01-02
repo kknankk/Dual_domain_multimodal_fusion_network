@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
+#adaptive from 'https://github.com/nyuad-cai/MedFuse'
 class Attention(nn.Module):
     def __init__(self, dim=64, num_heads=8, bias=False):
         super(Attention, self).__init__()
@@ -172,10 +172,6 @@ class LSTM(nn.Module):
 
 
 
-# # 使用输入形状 [16, 4096, 12]
-# input_tensor = torch.randn(16, 4096, 12)
-# # seq_lengths = torch.randint(1, 4096, (16,))  # 随机生成序列长度
-# output, features = LSTM(seq_lengths=4096)
 
 
 import torch.nn as nn
@@ -234,16 +230,16 @@ class SelfAttention(nn.Module):
     def forward(self, x):
         batch_size, _, _ = x.size()
         
-        # 计算 Q, K, V
+     
         q = self.query(x)
         k = self.key(x)
         v = self.value(x)
 
-        # 计算注意力分数
+      
         attention_scores = torch.matmul(q, k.transpose(-1, -2)) / (x.size(-1) ** 0.5)
         attention_weights = nn.functional.softmax(attention_scores, dim=-1)
 
-        # 计算加权的值
+    
         attention_output = torch.matmul(attention_weights, v)
 
         return attention_output
@@ -290,10 +286,10 @@ class mod_medfuse(nn.Module):
         )
         self.self_attention = SelfAttention(in_channels=256)
         self.self_attention1 = SelfAttention(in_channels=256)
-        self.self_attention2 = SelfAttention(in_channels=256)  # 第二层自注意力
-        self.fc1 = nn.Linear(768, 256)  # 输入维度为 512（模态 A 和 B 的拼接）
-        self.fc2 = nn.Linear(256, 4)  # 4 分类输出
-        self.dropout = nn.Dropout(0.3)  # Dropout 层，防止过拟合
+        self.self_attention2 = SelfAttention(in_channels=256)  
+        self.fc1 = nn.Linear(768, 256) 
+        self.fc2 = nn.Linear(256, 4) 
+        self.dropout = nn.Dropout(0.3)  
 
         # self.fc = nn.Linear(256, 4)
         # self.align_loss = CosineLoss()
@@ -429,23 +425,22 @@ class mod_medfuse(nn.Module):
             feats = torch.cat([feats1, cxr_feats[:,None,:]], dim=1)#[bs,2,256]
             
         # print(f'final feats {feats.shape}')
-        attention_output1 = self.self_attention1(feats)  # 形状为 [batch_size, 2, 256]
-        attention_output2 = self.self_attention2(attention_output1)  # 第二层自注意力
+        attention_output1 = self.self_attention1(feats)  
+        attention_output2 = self.self_attention2(attention_output1) 
 
-        # 取最后一个时间步的输出
-        attention_output = attention_output2[:, -1, :]  # 形状为 [batch_size, 256]
+       
+        attention_output = attention_output2[:, -1, :] 
 
-        # 特征融合
-        # 拼接模态 A 和 B 的输出
+       
         # print(f'cxr_feats {cxr_feats.shape}')
         # print(f'ecg_feats {feats1.shape}')
-        combined_features = torch.cat((cxr_feats[:, :], feats1[:, 0, :], attention_output), dim=1)  # 形状为 [batch_size, 512]
+        combined_features = torch.cat((cxr_feats[:, :], feats1[:, 0, :], attention_output), dim=1)  # [batch_size, 512]
 
-        # 分类输出
-        x = self.fc1(combined_features)  # 形状为 [batch_size, 256]
-        x = nn.functional.relu(x)  # 激活函数
-        x = self.dropout(x)  # Dropout
-        output = self.fc2(x)  # 形状为 [batch_size, 4]
+      
+        x = self.fc1(combined_features)  # [batch_size, 256]
+        x = nn.functional.relu(x) 
+        x = self.dropout(x) 
+        output = self.fc2(x)  # [batch_size, 4]
         return output
 
 
@@ -474,7 +469,7 @@ class mod_medfuse(nn.Module):
         # fused_preds = self.lstm_fused_cls(out)
         # print(f'output in model {fused_preds.shape}')
         # if fused_preds.dim() == 1:
-        #     fused_preds = fused_preds.unsqueeze(0)  # 转换为 [1, n] 的形状
+        #     fused_preds = fused_preds.unsqueeze(0)  
         # # return {
         # #     'lstm': fused_preds,
         # #     'ehr_feats': ehr_feats,
