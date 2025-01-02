@@ -1,16 +1,5 @@
 
 
-# import numpy as np
-
-# # 假设数据为一个 NumPy 数组，形状为 (16, 12, 4096)
-# data = np.random.randn(16, 12, 4096)  # 示例数据
-
-# # 计算每个通道的均值和方差，形状为 (12,)
-# channel_mean = np.mean(data, axis=(0, 2))
-# channel_variance = np.var(data, axis=(0, 2))
-
-# print("Channel Mean:", channel_mean)
-# print("Channel Variance:", channel_variance)
 
 
 import os
