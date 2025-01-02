@@ -9,7 +9,7 @@ from torchvision.models import resnet50, ResNet50_Weights
 import torch
 from torch import nn
 
-
+#adaptive from 'https://github.com/dorothy-yao/drfuse'
 class LearnablePositionalEncoding(nn.Module):
     def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 500):
         super().__init__()
@@ -56,39 +56,6 @@ class EHRTransformer(nn.Module):
 
         x = self.emb(x) # [16,4096,12]
         x = self.pos_encoder(x)
-#=======删除atten_mask
-        # feat = self.model_feat(x, src_key_padding_mask=attn_mask)
-        # h_shared = self.model_shared(feat, src_key_padding_mask=attn_mask)
-        # h_distinct = self.model_distinct(feat, src_key_padding_mask=attn_mask)
-
-        # padding_mask = torch.ones_like(attn_mask).unsqueeze(2)
-        # padding_mask[attn_mask==float('-inf')] = 0
-#=======删除atten_mask
-        feat = self.model_feat(x)
-
-        h_shared = self.model_shared(feat)
-        h_distinct = self.model_distinct(feat)
-#=======删除atten_mask
-        # padding_mask = torch.ones_like(attn_mask).unsqueeze(2)
-        # padding_mask[attn_mask==float('-inf')] = 0
-        # rep_shared = (padding_mask * h_shared).sum(dim=1) / padding_mask.sum(dim=1)
-        # rep_distinct = (padding_mask * h_distinct).sum(dim=1) / padding_mask.sum(dim=1)
-#=======删除atten_mask
-
-#======A=====================================
-#         rep_shared = h_shared.mean(dim=1)  # 对时间步求均值，结果形状为 (batch_size, d_model)
-#         rep_distinct = h_distinct.mean(dim=1)  # 对时间步求均值，结果形状为 (batch_size, d_model)
-# #======A=====================================
-    #    TODO:OR都是均值应该差不多，不过需要确定是在哪个维度求均值
-#======B=====================================
-        rep_shared = h_shared.sum(dim=1) / h_shared.shape[1]  # 对时间步求均值
-        rep_distinct = h_distinct.sum(dim=1) / h_distinct.shape[1]  # 对时间步求均值
-#======B=====================================
-        # 生成预测
-        pred_distinct = self.fc_distinct(rep_distinct).sigmoid()  # 使用Sigmoid激活函数
-
-
-        # pred_distinct = self.fc_distinct(rep_distinct).sigmoid()
 
         return rep_shared, rep_distinct, pred_distinct
 
@@ -100,7 +67,7 @@ class DrFuseModel(nn.Module):
         super().__init__()
         self.num_classes = num_classes
         self.logit_average = logit_average
-        #===============inputsize从76改为12
+      
         self.ehr_model = EHRTransformer(input_size=12, num_classes=num_classes,
                                         d_model=hidden_size, n_head=ehr_n_head,
                                         n_layers_feat=1, n_layers_shared=ehr_n_layers,
@@ -231,38 +198,3 @@ class DrFuseModel(nn.Module):
 
         return outputs
 
-    # Create a model instance
-# import torch
-# from torchinfo import summary
-# model = DrFuseModel(hidden_size=512, num_classes=7, ehr_dropout=0.1, ehr_n_layers=3, ehr_n_head=8)
-
-# # Create dummy input tensors
-# x = torch.randn(16, 4096, 12)  # EHR input
-# img = torch.randn(16, 3, 224, 224)  # CXR input
-# # seq_lengths = torch.randint(1, 4096, (16,))  # Sequence lengths
-# # pairs = torch.randn(16, 10)  # Example pairs input
-# seq_lengths=4096
-# # seq_lengths = torch.full((16,), 4096) 
-# # pairs=16
-# pairs = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-# # pairs = torch.tensor(pairs, dtype=torch.bool)  # Convert to a PyTorch tensor
-# pairs = torch.FloatTensor(pairs)
-# # Forward pass
-# model(x, img, seq_lengths, pairs)
-# summary(model, input_data=(x, img, seq_lengths, pairs))
-
-
-# model = EHRTransformer(input_size=12, num_classes=7, d_model=256)
-
-# # 创建随机输入张量
-# batch_size = 16
-# channels = 12
-# timestamps = 4096
-
-# # EHR input shape: (batch_size, channels, timestamps)
-# x = torch.randn(batch_size, timestamps, channels)  # 随机生成 EHR 数据
-# seq_lengths = torch.full((batch_size,), timestamps)  # 假设所有样本的长度都是 4096
-
-# # 前向传播并打印输出形状
-# model(x, seq_lengths)
-# summary(model, input_data=(x, seq_lengths))
