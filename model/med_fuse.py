@@ -112,10 +112,7 @@ class LSTM(nn.Module):
 
 
 
-# # 使用输入形状 [16, 4096, 12]
-# input_tensor = torch.randn(16, 4096, 12)
-# # seq_lengths = torch.randint(1, 4096, (16,))  # 随机生成序列长度
-# output, features = LSTM(seq_lengths=4096)
+
 
 
 import torch.nn as nn
@@ -360,7 +357,7 @@ class medfuse(nn.Module):
         fused_preds = self.lstm_fused_cls(out)
         # print(f'output in model {fused_preds.shape}')
         if fused_preds.dim() == 1:
-            fused_preds = fused_preds.unsqueeze(0)  # 转换为 [1, n] 的形状
+            fused_preds = fused_preds.unsqueeze(0)  
         # return {
         #     'lstm': fused_preds,
         #     'ehr_feats': ehr_feats,
