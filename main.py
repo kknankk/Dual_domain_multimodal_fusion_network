@@ -42,7 +42,7 @@ from train.deeper_fusion_trainer_mod import deeper_fusion_trainer_mod
 
 
 
-
+from model.DDMF_Net_hpb.py import DDMF_Net_hpblic7_1
 
 
 
@@ -82,6 +82,8 @@ fusion_train_dl,fusion_val_dl=get_ecgcxr_data_loader(batch_size=args.batch_size)
 
 if args.fusion_model=='DDMF_Net':
     fusion_model=DDMF_Net()
+elif args.fusion_model=='DDMF_Net_hpblic7_1':
+    fusion_model=DDMF_Net_hpblic7_1()
 
 
 
