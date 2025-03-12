@@ -7,7 +7,7 @@ from scipy.signal import stft, istft
 import torchaudio
 import sys
 import os
-sys.path.append(os.path.abspath('/home/ke/MIMIC_subset/MIMIC_subset'))
+
 from model.fusion_model import FtBlock
 # from model.fusion_model import Image2TextGate,Text2ImageGate,ImageFrequencySelection,TextFrequencySelection,FtLayer,FtBlock
 from model.ViT_b16 import VisionTransformer as vit
@@ -43,10 +43,10 @@ from torch import nn
 import random
 seed = 42
 random.seed(seed) 
-np.random.seed(seed)  # 设置 NumPy 随机种子
-torch.manual_seed(seed)  # 设置 PyTorch 随机种子
-torch.cuda.manual_seed(seed)  # 设置当前 GPU 随机种子
-torch.cuda.manual_seed_all(seed)  # 设置所有 GPU 随机种子
+np.random.seed(seed)  
+torch.manual_seed(seed)  
+torch.cuda.manual_seed(seed)  
+torch.cuda.manual_seed_all(seed)  
 torch.backends.cudnn.deterministic=True
 torch.backends.cudnn.benchmark = False
 
@@ -224,7 +224,7 @@ class ResNet1d(nn.Module):
         x=x.permute(0,2,1)
         x=self.lin128(x)
         # print(f'x {x.shape}')#[bs,16,128]
-        # x = x.view(-1, 128, 16)  # 将输出调整回 [bs, 128, 16]
+        # x = x.view(-1, 128, 16)  
         # print(f'after view x {x.shape}')
         # x1 = x.view(x.size(0), -1)
 
@@ -260,23 +260,7 @@ class ResBlock_fre(nn.Module):
         self.bn2 = nn.BatchNorm1d(n_filters_out)
         self.dropout2 = nn.Dropout(dropout_rate)
 
-        # Skip connection
-        # skip_connection_layers = []
-        # Deal with downsampling
-        # if downsample > 1:
-        #     maxpool = nn.MaxPool1d(downsample, stride=downsample)
-        #     skip_connection_layers += [maxpool]
-        # Deal with n_filters dimension increase
-        # if n_filters_in != n_filters_out:
-        # # if n_filters_out!=12:
-        #     # print(f'12 != n_filters_out {n_filters_out}')
-        #     conv1x1 = nn.Conv1d(n_filters_in, n_filters_out, 1, bias=False)
-        #     skip_connection_layers += [conv1x1]
-        # Build skip conection layer
-        # if skip_connection_layers:
-        #     self.skip_connection = nn.Sequential(*skip_connection_layers)
-        # else:
-        #     self.skip_connection = None
+        
 
     def forward(self, x):
         """Residual unit."""
@@ -340,7 +324,7 @@ class CXRModels(nn.Module):
         self.feats_dim = d_visual
 
     def forward(self, x):
-        # 获取 backbone 的输出
+
         visual_feats = self.vision_backbone.conv1(x)
         visual_feats = self.vision_backbone.bn1(visual_feats)
         visual_feats = self.vision_backbone.relu(visual_feats)
@@ -436,9 +420,9 @@ class CXRFeatureExtractor(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv1d(128, 64, kernel_size=3, stride=2, padding=1)
-        #换为kernel_size=1
+        
         # self.conv1 = nn.Conv1d(128, 64, kernel_size=1, stride=1, padding=0)
-        #换为kernel_size=1
+
         # self.pool = nn.AdaptiveAvgPool1d(32)
         self.pool = nn.AdaptiveMaxPool1d(output_size=16)
 
@@ -453,9 +437,9 @@ class final_extract(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv1d(64, 64, kernel_size=5, stride=2, padding=2)
-        #换为kernel_size=1
+     
         # self.conv1 = nn.Conv1d(128, 64, kernel_size=1, stride=1, padding=0)
-        #换为kernel_size=1
+    
         self.pool = nn.AdaptiveAvgPool1d(1)
         # self.layernorm=nn.LayerNorm(d_model)
 
@@ -465,20 +449,6 @@ class final_extract(nn.Module):
         # cxr=nn.LayerNorm(cxr)
         return cxr
 
-# class MultiModalFusion(nn.Module):
-    # def __init__(self):
-    #     super().__init__()
-    #     self.ecg_extractor = ECGFeatureExtractor()
-    #     self.cxr_extractor = CXRFeatureExtractor()
-    #     self.tfam = TFAM(in_channel=64)  # Use the TFAM module defined previously
-
-    # def forward(self, ecg, cxr):
-    #     ecg_features = self.ecg_extractor(ecg)  # [bs, 64, 32]
-    #     cxr_features = self.cxr_extractor(cxr)  # [bs, 64, 32]
-    #     fused_features = self.tfam(ecg_features, cxr_features)  # [bs, 64, 32]
-    #     return fused_features
-
-# Example
 
 
 class final_fusion(nn.Module):
@@ -493,10 +463,7 @@ class final_fusion(nn.Module):
         )
 
     def forward(self, x,y):
-        #随机生成一个4维数据先
-        # print(f'x {x.shape}')
-        # print(f'y {y.shape}')
-        # x = torch.randn(7, 256, 7, 7)
+       
         b, c ,_= x.size()
         # b, c = x.size()
         # y = self.avg_pool(x).view(b, c)
@@ -609,51 +576,17 @@ class Fusion(nn.Module):
         self._rank = get_rank()
         self.mlp1 = MLP(64, int(64*2), 64, 9, dropout=0.5)
         self.mlp2 = MLP(64, int(64*2), 64, 9, dropout=0.5)
-        self.delta_image = nn.Parameter(torch.tensor(0.1))  # 图像模态的松弛变量
-        self.delta_text = nn.Parameter(torch.tensor(0.1))   # 文本模态的松弛变量
-        self.lambda_reg = 0.01  # 松弛变量的L2正则化强度
+        self.delta_image = nn.Parameter(torch.tensor(0.1))  
+        self.delta_text = nn.Parameter(torch.tensor(0.1))   
+        self.lambda_reg = 0.01  
         self.hyperCA=hyperCA(128,32)
 
-        # self.gatt1_poin = GraphAttentionLayerFusion(in_features=117,hidden_features=13,n_heads=9,num_neighbors=None)
-        # self.fc1 = nn.Linear(64, 54)
-        # self.fc2 = nn.Linear(64, 54)
-
-        # self.ca = CrossAttentionLayer(64, 4)
-
-#新加jsd_loss
-        # self.jsd=JSD()
-#新加jsd_loss
 
 
 
-    # def get_diff_loss(self):
 
-    #     shared_t = self.imfm.utt_shared_ecg
-    #     shared_v = self.imfm.utt_shared_cxr
-    #     # shared_a = self.model.utt_shared_a
-    #     private_t = self.imfm.utt_private_ecg
-    #     private_v = self.imfm.utt_private_cxr
-    #     # private_a = self.model.utt_private_a
 
-    #     # Between private and shared
-    #     loss = self.loss_diff(private_t, shared_t)
-    #     loss += self.loss_diff(private_v, shared_v)
-    #     # loss += self.loss_diff(private_a, shared_a)
-
-    #     # Across privates
-    #     # loss += self.loss_diff(private_a, private_t)
-    #     # loss += self.loss_diff(private_a, private_v)
-    #     loss += self.loss_diff(private_t, private_v)
-
-    #     return loss
-    
-    # def get_recon_loss(self, ):
-
-    #     loss = self.loss_recon(self.imfm.utt_ecg_recon, self.imfm.utt_ecg_orig)
-    #     loss += self.loss_recon(self.imfm.utt_cxr_recon, self.imfm.utt_cxr_orig)
-    #     # loss += self.loss_recon(self.model.utt_a_recon, self.model.utt_a_orig)
-    #     loss = loss/2.0
-    #     return loss  
+   
     @property
     def device(self) -> torch.device:
         return self.logit_scale.device
@@ -662,21 +595,10 @@ class Fusion(nn.Module):
         text = self.ecg_extractor(text)  # [bs, 64, 32]
         image = self.cxr_extractor(image)
         bs=text.size(0)
-        # text=text.view(bs,-1)
-        # print(f'text {text.shape}')
         
-        # image=image.view(bs,-1)
-        # print(f'image {image.shape}')
         text = torch.max(text, dim=2)[0]
         image = torch.max(image, dim=2)[0]
-        # fusedE_E = self.ca(text, image, image)
-        # fusedE_C = self.ca(image, text, text)
-        # fused=torch.cat([fusedE_E,fusedE_C,cli],dim=1)
-
-
-
-                # print(f'f {f.shape}')
-        
+       
 
         self.curv.data = torch.clamp(self.curv.data, **self._curv_minmax)
         _curv = self.curv.exp()
@@ -762,16 +684,7 @@ class Fusion(nn.Module):
         # print(f'entailment_loss1 {entailment_loss1}')
 
       
-        # # 区域划分掩码
-        # # mask1_safe = _angle1 <= (_aperture1 + self.delta_image)  # 安全区（绿色+黄色，无惩罚）
-        # # mask1_penalty = _angle1 > (_aperture1 + self.delta_image)  # 惩罚区（红色）
-      
-        # # 仅对红色区域计算损失
-        # loss1 = torch.zeros_like(_angle1)
-        # loss1[mask1_penalty] = _angle1[mask1_penalty] - (_aperture1[mask1_penalty] + self.delta_image)
-        # entailment_loss1 = loss1.mean() + self.lambda_reg * self.delta_image**2
-
-        # --- 文本模态的损失计算 ---
+       
         text_feats=self.mlp2(text_feats)
         _angle2 = L.oxy_angle(text_feats, cli_feats, _curv)
         _aperture2 = L.half_aperture(text_feats, _curv)
@@ -786,11 +699,7 @@ class Fusion(nn.Module):
         # loss2[mask2_penalty] = _angle2[mask2_penalty] - (_aperture2[mask2_penalty] + self.delta_text)
         # entailment_loss2 = loss2.mean() + self.lambda_reg * self.delta_text**2
 
-        # 总损失
-        # total_loss = entailment_loss1 + entailment_loss2
         
-        # 总损失
-        # total_loss = entailment_loss1 + entailment_loss2
 
         loss = contrastive_loss
         total_loss = loss + 0.2 * entailment_loss1+ 0.2 * entailment_loss2
@@ -799,16 +708,7 @@ class Fusion(nn.Module):
         f=torch.cat([image_feats,text_feats,cli_feats],dim=1)
 
 
-        # f=self.imfm(text1,image1)
-    #     f3=text+image
-    #     f=torch.cat([f,f3],dim=1)
-
-    #     diff_loss = self.get_diff_loss()
-    #     # domain_loss = self.get_domain_loss()
-    #     recon_loss = self.get_recon_loss()
-    #     jsd_loss=self.jsd(self.imfm.utt_shared_ecg.sigmoid(), self.imfm.utt_shared_cxr.sigmoid())
-
-    #     loss1 = self.a1 * diff_loss + self.a2 * jsd_loss + self.a3 * recon_loss
+   
 
         return f,f1,f_hptrans,total_loss
 
@@ -816,16 +716,7 @@ class Fusion(nn.Module):
 
 
 
-    # @staticmethod
-    # def js_div(p, q):
-    #     """
-    #     Function that measures JS divergence between target and output logits:
-    #     """
-    #     M = (p + q) / 2
-    #     kl1 = F.kl_div(F.log_softmax(M, dim=-1), F.softmax(p, dim=-1), reduction='batchmean')
-    #     kl2 = F.kl_div(F.log_softmax(M, dim=-1), F.softmax(q, dim=-1), reduction='batchmean')
-    #     gamma = 0.5 * kl1 + 0.5 * kl2
-    #     return gamma
+   
 
 
 
@@ -857,15 +748,15 @@ class Classifier(nn.Module):
     def __init__(self, num_classes):
         super(Classifier, self).__init__()
         self.fc1 = nn.Linear(64 * 32, 128)
-        self.bn1 = nn.BatchNorm1d(128)  # 批归一化
+        self.bn1 = nn.BatchNorm1d(128)  
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.5)  # Dropout层，防止过拟合
+        self.dropout = nn.Dropout(0.5)  
         self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
-        x = self.bn1(x)  # 批归一化
+        x = self.bn1(x)  
         x = self.relu(x)
         x = self.dropout(x)  # Dropout
         x = self.fc2(x)
@@ -913,98 +804,6 @@ class domain_fusion(nn.Module):
         return output
         
       
-# class DenseLayer(nn.Module):
-#     def __init__(self, in_channels, growth_rate):
-#         super(DenseLayer, self).__init__()
-#         self.bn1 = nn.BatchNorm1d(in_channels)
-#         self.relu1 = nn.ReLU(inplace=True)
-#         self.conv1 = nn.Conv1d(in_channels, growth_rate, kernel_size=1, bias=False)
-#         self.bn2 = nn.BatchNorm1d(growth_rate)
-#         self.relu2 = nn.ReLU(inplace=True)
-#         self.conv2 = nn.Conv1d(growth_rate, growth_rate, kernel_size=3, padding=1, bias=False)
-
-#     def forward(self, x):
-#         out = self.conv1(self.relu1(self.bn1(x)))
-#         out = self.conv2(self.relu2(self.bn2(out)))
-#         return torch.cat((x, out), 1)
-
-# class DenseBlock(nn.Module):
-#     def __init__(self, in_channels, num_layers, growth_rate):
-#         super(DenseBlock, self).__init__()
-#         layers = []
-#         for _ in range(num_layers):
-#             layers.append(DenseLayer(in_channels, growth_rate))
-#             in_channels += growth_rate
-#         self.block = nn.Sequential(*layers)
-
-#     def forward(self, x):
-#         return self.block(x)
-
-# class DenseNet1D(nn.Module):
-#     def __init__(self, input_dim, growth_rate, num_layers, num_classes):
-#         super(DenseNet1D, self).__init__()
-#         self.conv0 = nn.Conv1d(input_dim, 2 * growth_rate, kernel_size=3, padding=1)
-#         self.relu0 = nn.ReLU(inplace=True)
-#         self.dense_block = DenseBlock(2 * growth_rate, num_layers, growth_rate)
-#         self.fc = nn.Linear(2 * growth_rate + num_layers * growth_rate, num_classes)
-
-#     def forward(self, x):
-#         x = self.conv0(x)
-#         x = self.relu0(x)
-#         x = self.dense_block(x)
-#         x = x.mean(dim=2)  # 全局平均池化
-#         x = self.fc(x)
-#         return x
-
-
-# class DenseLayer(nn.Module):
-#     def __init__(self, in_channels, growth_rate):
-#         super(DenseLayer, self).__init__()
-#         self.bn1 = nn.BatchNorm1d(in_channels)
-#         self.relu1 = nn.LeakyReLU(0.2, inplace=True)  # 使用 LeakyReLU
-#         self.conv1 = nn.Conv1d(in_channels, growth_rate, kernel_size=1, bias=False)
-#         self.bn2 = nn.BatchNorm1d(growth_rate)
-#         self.relu2 = nn.LeakyReLU(0.2, inplace=True)
-#         self.conv2 = nn.Conv1d(growth_rate, growth_rate, kernel_size=3, padding=1, bias=False)
-
-#     def forward(self, x):
-#         out = self.conv1(self.relu1(self.bn1(x)))
-#         out = self.conv2(self.relu2(self.bn2(out)))
-#         return torch.cat((x, out), 1)
-
-# class DenseBlock(nn.Module):
-#     def __init__(self, in_channels, num_layers, growth_rate):
-#         super(DenseBlock, self).__init__()
-#         layers = []
-#         for _ in range(num_layers):
-#             layers.append(DenseLayer(in_channels, growth_rate))
-#             in_channels += growth_rate
-#         self.block = nn.Sequential(*layers)
-
-#     def forward(self, x):
-#         return self.block(x)
-
-# class DenseNet1D(nn.Module):
-#     def __init__(self, input_dim, growth_rate, num_layers, num_classes):
-#         super(DenseNet1D, self).__init__()
-#         self.conv0 = nn.Conv1d(input_dim, 2 * growth_rate, kernel_size=3, padding=1)
-#         self.relu0 = nn.LeakyReLU(0.2, inplace=True)
-#         self.dense_block = DenseBlock(2 * growth_rate, num_layers, growth_rate)
-#         self.fc = nn.Linear(2 * growth_rate + num_layers * growth_rate, num_classes)
-#         self.dropout = nn.Dropout(0.5)  # 添加 Dropout
-#         self.upsample = nn.ConvTranspose1d(num_classes, 64, kernel_size=1)  # 使用转置卷积上采样
-
-#     def forward(self, x):
-#         # x = x.unsqueeze(-1)  # 转换形状
-#         x = self.conv0(x)
-#         x = self.relu0(x)
-#         x = self.dense_block(x)
-#         x = x.mean(dim=2)  # 全局平均池化
-#         x = self.fc(x)
-#         x = self.dropout(x)  # Dropout
-#         x = x.unsqueeze(-1)  # 增加最后一个维度
-#         x = self.upsample(x)  # 使用转置卷积上采样
-#         return x
 
      
 class DenseLayer(nn.Module):
@@ -1051,32 +850,10 @@ class DenseNet1D(nn.Module):
         return x
 
 
-# import torch
-# import torch.nn as nn
-
-# class ClinicalDataTransformer(nn.Module):
-#     def __init__(self):
-#         super(ClinicalDataTransformer, self).__init__()
-#         self.fc1 = nn.Linear(9, 32)  # 第一个全连接层
-#         self.bn1 = nn.BatchNorm1d(32)  # 批归一化
-#         self.fc2 = nn.Linear(32, 64)  # 第二个全连接层
-#         self.bn2 = nn.BatchNorm1d(64)  # 批归一化
-#         self.relu = nn.ReLU()  # 激活函数
-#         self.dropout = nn.Dropout(0.5)  # Dropout层
-
-#     def forward(self, x):
-#         x = self.fc1(x)  # 输入数据
-#         x = self.bn1(x)  # 批归一化
-#         x = self.relu(x)  # 应用激活函数
-#         x = self.dropout(x)  # 应用 Dropout
-#         x = self.fc2(x)  # 转换到目标维度
-#         x = self.bn2(x)  # 批归一化
-#         x = self.relu(x)  # 应用激活函数
-#         return x
 
 
 
-# print(output_data.shape)  # 输出应该是 [batch_size, 64]
+
 
 class DDMF_Net_hpblic7_1(nn.Module):
     def __init__(self,  d_text=12, seq_len=4369, img_size=224, patch_size=16, d_model=128,
@@ -1091,7 +868,7 @@ class DDMF_Net_hpblic7_1(nn.Module):
                                         #   nn.LayerNorm(d_model),
                                           )
         # s = seq_len // 2 + 1
-#=====未对ecg做rfft,所以特征维度不会变为1/2
+
         self.ecg_norm=nn.LayerNorm(d_model)
         s=seq_len
 
@@ -1132,10 +909,10 @@ class DDMF_Net_hpblic7_1(nn.Module):
         # self.vit.load_from(np.load('/home/mimic/MIMIC_subset/MIMIC_subset/imagenet21k_ViT-B_16.npz'))
         original_weights = np.load('/mnt/old_data/home/mimic/MIMIC_subset/MIMIC_subset/imagenet21k_ViT-B_16.npz')
 
-        # 创建一个新的字典，剔除与 self.head 相关的权重
+      
         filtered_weights = {key: value for key, value in original_weights.items() if 'head' not in key}
 
-        # 加载过滤后的权重
+      
         self.vit.load_from(filtered_weights)
         self.layernorm = nn.LayerNorm(128)
         self.act_layer = nn.ReLU()
