@@ -26,7 +26,7 @@ train_dl, val_dl = get_ecgcxr_data_loader(batch_size=args.batch_size)
 from sklearn.metrics import f1_score
 import torch
 import torch.distributed as dist
-os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3,4,5,6,7" #use first four GPU
+os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3,4,5,6,7" 
 import os
 os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
 
@@ -43,7 +43,7 @@ class deeper_fusion_trainer_hpblic(Trainer):
         model,
         test_dl=None):
      
-        # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1" #use first four GPU
+        # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
         super(deeper_fusion_trainer_hpblic,self).__init__(args)
         dist.init_process_group(backend='nccl')
